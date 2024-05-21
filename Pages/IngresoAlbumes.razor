@@ -1,0 +1,111 @@
+﻿@page "/ingreso-Albumes"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<h3>Albumes Ingreso</h3>
+
+<EditForm Model="@album" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label label for "Nombre"> Nombre </label>
+        <InputText id="Nombre" @bind-Value="album.Nombre" class="from-control" />
+        <ValidationMessage For="() => album.Nombre" />
+    </div
+    <div class="form-group">
+        <label label for "Artista"> Artista</label>
+        <InputText id="Artista" @bind-Value="album.Artista" class="from-control" />
+        <ValidationMessage For="() => album.Artista" />
+    </div>
+    <div class="form-group">
+        <label label for "Duracion"> Duraccion cancion </label>
+        <InputNumber id="Duracion" @bind-Value="album.Duracion" class="from-control" />
+    </div>
+
+    <div class="form-group">
+        <label label for "Titulo"> Titulo album</label>
+        <InputText id="Titulo" @bind-Value="album.Titulo" class="from-control" />
+        <ValidationMessage For="() => album.Titulo" />
+    </div>
+
+    <div class="form-group">
+        <label label for "listadoCanciones">  Listado</label>
+        <InputText d="listadoCanciones" @bind-Value="album.listadoCanciones" class="from-control" />
+        <ValidationMessage For="() => album.listadoCanciones" />
+    </div>
+    <div class="form-group">
+        <label label for "FechaPublicacion"> FechaPublicacion </label>
+        <InputDate id="FechaPublicacion" @bind-Value="album.FechaPublicacion" class="from-control" />
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </div>
+
+</EditForm>
+@if (albumes != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Artista</th>
+                <th>Tiempo</th>
+                <th>Titulo</th>
+                <th>Listado</th>
+                <th>Fechapublicacion</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var album2 in albumes)
+            {
+                <tr>
+                    <td>@album2.Nombre</td>
+                    <td>@album2.Artista</td>
+                    <td>@album2.Duracion</td>
+                    <td>@album2.Titulo</td>
+                    <td>@album2.listadoCanciones</td>
+                    <td>@album2.FechaPublicacion</td>
+                    <td>
+                        <button class="btn btn-danger"
+                                @onclick="@(() => Borrar(album2.Nombre))">
+                            Eliminar
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning"
+                                @onclick="@(() => NavigationManager.NavigateTo($"/editar-Albumes/{album2.Nombre}"))">
+                            Editar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    List<clsAlbunmes> albumes = new List<clsAlbunmes>();
+    private clsAlbunmes album = new clsAlbunmes();
+
+    protected async Task Guardar()
+    {
+        albumes.Add(album);
+        album = new clsAlbunmes();
+        await localStorage.SetItemAsync("Albumes", albumes);
+
+    }
+    protected override async Task OnInitializedAsync()
+    {  //La primera vez que se corre poner en comentarios, pues como no existen datos
+       //convierta la lista catedraticos en null
+       albumes = await localStorage.GetItemAsync<List<clsAlbunmes>>("Albumes");
+    }
+    protected async Task Borrar(string N)
+    {
+        albumes.Remove(albumes.First(c => c.Nombre == N));
+        await localStorage.SetItemAsync("Albumes", albumes);
+    }
+
+}
